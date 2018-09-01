@@ -10,7 +10,6 @@
 #include <fstream>
 #include <map>
 #include <cstddef>
-#include <random>
 
 //helper defined later; throws if shader compilation fails:
 static GLuint compile_shader(GLenum type, std::string const &source);
@@ -203,16 +202,11 @@ Game::Game() {
 	//set up game board with meshes and rolls:
 	board_meshes.reserve(board_size.x * board_size.y);
 	//board_rotations.reserve(board_size.x * board_size.y);
-	std::mt19937 mt(0xbead1234);
 
-	std::vector< Mesh const * > meshes{ &doll_mesh, &egg_mesh, &cube_mesh };
+	mt = std::mt19937(std::time(NULL));
+    meshes = { &doll_mesh, &egg_mesh, &cube_mesh };
+    generate_game_data();
 
-	for (uint32_t i = 0; i < board_size.x * board_size.y; ++i) {
-        // y*5 + x
-        board_meshes[i] = NULL;
-		//board_rotations.emplace_back(glm::quat());
-	}
-    board_meshes[12] = meshes[0]; //place a doll in the middle
 }
 
 Game::~Game() {
@@ -228,31 +222,129 @@ Game::~Game() {
 	GL_ERRORS();
 }
 
+void Game::generate_game_data () {
+    struct boop {
+        glm::vec2 v[2];
+        glm::vec2 pickup;
+    };
+
+    //possible tile positions
+    std::vector<struct boop> tile_positions = {{
+        {{glm::vec2(1,4), glm::vec2(0,3)}, glm::vec2(1,3)},
+        {{glm::vec2(2,4), glm::vec2(2,4)}, glm::vec2(2,3)},
+        {{glm::vec2(3,4), glm::vec2(4,3)}, glm::vec2(3,3)},
+        {{glm::vec2(0,2), glm::vec2(0,2)}, glm::vec2(1,2)},
+        {{glm::vec2(0,1), glm::vec2(1,0)}, glm::vec2(1,1)},
+        {{glm::vec2(2,0), glm::vec2(2,0)}, glm::vec2(2,1)},
+        {{glm::vec2(3,0), glm::vec2(4,1)}, glm::vec2(3,1)},
+        {{glm::vec2(4,2), glm::vec2(4,2)}, glm::vec2(3,2)}
+    }};
+
+
+    //reset inventory
+    inventory.p = 0;
+    inventory.b = 0;
+    inventory.j = 0;
+
+    //reset chef position
+    chef_loc.x = 2;
+    chef_loc.y = 2;
+
+    //generate tile locations
+    size_t rand_index = mt()%tile_positions.size();
+    p_loc = tile_positions[rand_index].v[mt()%2];
+    p_pickup = tile_positions[rand_index].pickup;
+    tile_positions.erase(tile_positions.begin() + rand_index);
+
+    rand_index = mt()%tile_positions.size();
+    b_loc = tile_positions[rand_index].v[mt()%2];
+    b_pickup = tile_positions[rand_index].pickup;
+    tile_positions.erase(tile_positions.begin() + rand_index);
+
+    rand_index = mt()%tile_positions.size();
+    j_loc = tile_positions[rand_index].v[mt()%2];
+    j_pickup = tile_positions[rand_index].pickup;
+    tile_positions.erase(tile_positions.begin() + rand_index);
+
+    rand_index = mt()%tile_positions.size();
+    serve_loc = tile_positions[rand_index].v[mt()%2];
+    serve_pickup = tile_positions[rand_index].pickup;
+    tile_positions.erase(tile_positions.begin() + rand_index);
+
+    //fill boardmesh
+
+    for (uint32_t i = 0; i < board_size.y; ++i) {
+        for (uint32_t j = 0; j < board_size.x; ++j) {
+            if ( i>=1 && i<=3 && j>=1 && j<=3) { //inner tiles
+                board_meshes[to1D(j,i)] = NULL; //TODO:: spawn borders
+            } else {
+                board_meshes[to1D(j,i)] = NULL; //TODO:: spawn borders
+            }
+        }
+    }
+    board_meshes[to1D(chef_loc.x,chef_loc.y)] = meshes[0]; //place a doll in the middle
+    board_meshes[to1D(p_loc.x,p_loc.y)] = meshes[1]; //place a doll in the middle
+    board_meshes[to1D(b_loc.x,b_loc.y)] = meshes[2]; //place a doll in the middle
+    board_meshes[to1D(j_loc.x,j_loc.y)] = meshes[1]; //place a doll in the middle
+    board_meshes[to1D(serve_loc.x,serve_loc.y)] = meshes[0]; //place a doll in the middle
+}
+
+size_t Game::to1D (size_t x, size_t y) {
+    return y*board_size.y + x;
+}
+
+void Game::update_chef_loc(uint32_t x, uint32_t y) {
+    //if new move is invalid, return immediately
+    size_t i = chef_loc.x + x;
+    size_t j = chef_loc.y + y;
+    if (!(i>=1 && i<=3 && j>=1 && j<=3)) {return;}
+    board_meshes[to1D(chef_loc.x, chef_loc.y)] = NULL;
+    chef_loc.x = i;
+    chef_loc.y = j;
+    board_meshes[to1D(chef_loc.x, chef_loc.y)] = meshes[0];
+
+}
+
+size_t min (size_t a, size_t b) {
+    return (a<b) ? a : b;
+}
+
 bool Game::handle_event(SDL_Event const &evt, glm::uvec2 window_size) {
 	//ignore any keys that are the result of automatic key repeat:
 	if (evt.type == SDL_KEYDOWN && evt.key.repeat) {
 		return false;
 	}
 	//handle tracking the state of WSAD for roll control:
-	if (evt.type == SDL_KEYDOWN || evt.type == SDL_KEYUP) {
+	if (evt.type == SDL_KEYDOWN) {
 		if (evt.key.keysym.scancode == SDL_SCANCODE_W) {
-			controls.roll_up = (evt.type == SDL_KEYDOWN);
+            update_chef_loc(0, 1);
 			return true;
 		} else if (evt.key.keysym.scancode == SDL_SCANCODE_S) {
-			controls.roll_down = (evt.type == SDL_KEYDOWN);
+            update_chef_loc(0, -1);
 			return true;
 		} else if (evt.key.keysym.scancode == SDL_SCANCODE_A) {
-			controls.roll_left = (evt.type == SDL_KEYDOWN);
+            update_chef_loc(-1, 0);
 			return true;
 		} else if (evt.key.keysym.scancode == SDL_SCANCODE_D) {
-			controls.roll_right = (evt.type == SDL_KEYDOWN);
+            update_chef_loc(1, 0);
 			return true;
 		}
 	}
 	//do stuff on SPACE press:
 	if (evt.type == SDL_KEYDOWN && evt.key.repeat == 0) {
 		if (evt.key.keysym.scancode == SDL_SCANCODE_SPACE) {
-		//TODO: do stuff
+            if ( chef_loc.x == p_pickup.x && chef_loc.y == p_pickup.y) {
+                inventory.p = min(inventory.p + 1, 1);
+            } else if ( chef_loc.x == b_pickup.x && chef_loc.y == b_pickup.y) {
+                inventory.b = min(inventory.b + 1, 2);
+            } else if ( chef_loc.x == j_pickup.x && chef_loc.y == j_pickup.y) {
+                inventory.j = min(inventory.j + 1, 1);
+            } else if ( chef_loc.x == serve_pickup.x && chef_loc.y == serve_pickup.y) {
+                if (inventory.p == 1 && inventory.j == 1 && inventory.b == 2) {
+                    //TODO: YOU WIN, RESET THE GAME
+                    generate_game_data();
+                }
+            }
             return true;
 		}
     }

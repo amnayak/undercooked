@@ -7,6 +7,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include <vector>
+#include <random>
 
 // The 'Game' struct holds all of the game-relevant state,
 // and is called by the main loop.
@@ -30,6 +31,13 @@ struct Game {
 
     //converts coordinates from 2D to 1D
     size_t to1D(size_t x, size_t y);
+
+    //generate game data, fill structs
+    void generate_game_data();
+
+    //update the chef's position in the board mesh and in the game state
+    //parameters are the change in x and y!
+    void update_chef_loc(uint32_t x, uint32_t y);
 
 	//------- opengl resources -------
 
@@ -70,48 +78,37 @@ struct Game {
 	GLuint meshes_for_simple_shading_vao = -1U; //vertex array object that describes how to connect the meshes_vbo to the simple_shading_program
 
 	//------- game state -------
-
+    std::mt19937 mt;
 	glm::uvec2 board_size = glm::uvec2(5,5);
 	std::vector< Mesh const * > board_meshes;
+    std::vector< Mesh const * > meshes;
 //	std::vector< glm::quat > board_rotations;
 
 //	glm::uvec2 curor = glm::vec2(0,0);
-
 	struct {
 		bool roll_left = false;
 		bool roll_right = false;
 		bool roll_up = false;
 		bool roll_down = false;
 	} controls;
-
+//TODO: spell it out
     struct {
         size_t p = 0;
         size_t b = 0;
         size_t j = 0;
     } inventory;
 
-    struct {
-        struct {
-            size_t x = 1;
-            size_t y = 4;
-        } p;
-        struct {
-            size_t x = 4;
-            size_t y = 1;
-        } b;
-        struct {
-            size_t x = 1;
-            size_t y = 3;
-        } j;
-        struct {
-            size_t x = 3;
-            size_t y = 1;
-        } serve;
-    } tile_loc;
+    //TODO: you're gonna generate game data anyway
 
-    struct {
-        size_t x = 2;
-        size_t y = 2;
-    } chef_loc;
+    glm::uvec2 p_loc = glm::vec2(1,4);
+    glm::uvec2 b_loc = glm::vec2(3,4);
+    glm::uvec2 j_loc = glm::vec2(0,1);
+    glm::uvec2 serve_loc = glm::vec2(3,0);
 
+    glm::uvec2 p_pickup = glm::vec2(1,4);
+    glm::uvec2 b_pickup = glm::vec2(3,4);
+    glm::uvec2 j_pickup = glm::vec2(0,1);
+    glm::uvec2 serve_pickup = glm::vec2(3,0);
+
+    glm::uvec2 chef_loc = glm::vec2(2,2);
 };
