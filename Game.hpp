@@ -28,6 +28,9 @@ struct Game {
 	//draw is called after update:
 	void draw(glm::uvec2 drawable_size);
 
+    //converts coordinates from 2D to 1D
+    size_t to1D(size_t x, size_t y);
+
 	//------- opengl resources -------
 
 	//shader program that draws lit objects with vertex colors:
@@ -68,11 +71,11 @@ struct Game {
 
 	//------- game state -------
 
-	glm::uvec2 board_size = glm::uvec2(5,4);
+	glm::uvec2 board_size = glm::uvec2(5,5);
 	std::vector< Mesh const * > board_meshes;
-	std::vector< glm::quat > board_rotations;
+//	std::vector< glm::quat > board_rotations;
 
-	glm::uvec2 cursor = glm::vec2(0,0);
+//	glm::uvec2 curor = glm::vec2(0,0);
 
 	struct {
 		bool roll_left = false;
@@ -80,5 +83,35 @@ struct Game {
 		bool roll_up = false;
 		bool roll_down = false;
 	} controls;
+
+    struct {
+        size_t p = 0;
+        size_t b = 0;
+        size_t j = 0;
+    } inventory;
+
+    struct {
+        struct {
+            size_t x = 1;
+            size_t y = 4;
+        } p;
+        struct {
+            size_t x = 4;
+            size_t y = 1;
+        } b;
+        struct {
+            size_t x = 1;
+            size_t y = 3;
+        } j;
+        struct {
+            size_t x = 3;
+            size_t y = 1;
+        } serve;
+    } tile_loc;
+
+    struct {
+        size_t x = 2;
+        size_t y = 2;
+    } chef_loc;
 
 };

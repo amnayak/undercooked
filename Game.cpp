@@ -197,21 +197,22 @@ Game::Game() {
 		}
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
-
 	GL_ERRORS();
 
 	//----------------
 	//set up game board with meshes and rolls:
 	board_meshes.reserve(board_size.x * board_size.y);
-	board_rotations.reserve(board_size.x * board_size.y);
+	//board_rotations.reserve(board_size.x * board_size.y);
 	std::mt19937 mt(0xbead1234);
 
 	std::vector< Mesh const * > meshes{ &doll_mesh, &egg_mesh, &cube_mesh };
 
 	for (uint32_t i = 0; i < board_size.x * board_size.y; ++i) {
-		board_meshes.emplace_back(meshes[mt()%meshes.size()]);
-		board_rotations.emplace_back(glm::quat());
+        // y*5 + x
+        board_meshes[i] = NULL;
+		//board_rotations.emplace_back(glm::quat());
 	}
+    board_meshes[12] = meshes[0]; //place a doll in the middle
 }
 
 Game::~Game() {
@@ -248,60 +249,28 @@ bool Game::handle_event(SDL_Event const &evt, glm::uvec2 window_size) {
 			return true;
 		}
 	}
-	//move cursor on L/R/U/D press:
+	//do stuff on SPACE press:
 	if (evt.type == SDL_KEYDOWN && evt.key.repeat == 0) {
-		if (evt.key.keysym.scancode == SDL_SCANCODE_LEFT) {
-			if (cursor.x > 0) {
-				cursor.x -= 1;
-			}
-			return true;
-		} else if (evt.key.keysym.scancode == SDL_SCANCODE_RIGHT) {
-			if (cursor.x + 1 < board_size.x) {
-				cursor.x += 1;
-			}
-			return true;
-		} else if (evt.key.keysym.scancode == SDL_SCANCODE_UP) {
-			if (cursor.y + 1 < board_size.y) {
-				cursor.y += 1;
-			}
-			return true;
-		} else if (evt.key.keysym.scancode == SDL_SCANCODE_DOWN) {
-			if (cursor.y > 0) {
-				cursor.y -= 1;
-			}
-			return true;
+		if (evt.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+		//TODO: do stuff
+            return true;
 		}
-	}
+    }
 	return false;
 }
 
 void Game::update(float elapsed) {
 	//if the roll keys are pressed, rotate everything on the same row or column as the cursor:
-	glm::quat dr = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-	float amt = elapsed * 1.0f;
+	//float amt = elapsed * 1.0f;
 	if (controls.roll_left) {
-		dr = glm::angleAxis(amt, glm::vec3(0.0f, 1.0f, 0.0f)) * dr;
+      // something.transform->position.x += amt * -1.0f;
+       //TODO: bounds checking, min func, fix smthn, other controls
 	}
 	if (controls.roll_right) {
-		dr = glm::angleAxis(-amt, glm::vec3(0.0f, 1.0f, 0.0f)) * dr;
 	}
 	if (controls.roll_up) {
-		dr = glm::angleAxis(amt, glm::vec3(1.0f, 0.0f, 0.0f)) * dr;
 	}
 	if (controls.roll_down) {
-		dr = glm::angleAxis(-amt, glm::vec3(1.0f, 0.0f, 0.0f)) * dr;
-	}
-	if (dr != glm::quat()) {
-		for (uint32_t x = 0; x < board_size.x; ++x) {
-			glm::quat &r = board_rotations[cursor.y * board_size.x + x];
-			r = glm::normalize(dr * r);
-		}
-		for (uint32_t y = 0; y < board_size.y; ++y) {
-			if (y != cursor.y) {
-				glm::quat &r = board_rotations[y * board_size.x + cursor.x];
-				r = glm::normalize(dr * r);
-			}
-		}
 	}
 }
 
@@ -368,25 +337,27 @@ void Game::draw(glm::uvec2 drawable_size) {
 					x+0.5f, y+0.5f,-0.5f, 1.0f
 				)
 			);
-			draw_mesh(*board_meshes[y*board_size.x+x],
-				glm::mat4(
-					1.0f, 0.0f, 0.0f, 0.0f,
-					0.0f, 1.0f, 0.0f, 0.0f,
-					0.0f, 0.0f, 1.0f, 0.0f,
-					x+0.5f, y+0.5f, 0.0f, 1.0f
-				)
-				* glm::mat4_cast(board_rotations[y*board_size.x+x])
-			);
+
+            if (board_meshes[y*board_size.x+x] != NULL) {
+                draw_mesh(*board_meshes[y*board_size.x+x],
+                        glm::mat4(
+                            1.0f, 0.0f, 0.0f, 0.0f,
+                            0.0f, 1.0f, 0.0f, 0.0f,
+                            0.0f, 0.0f, 1.0f, 0.0f,
+                            x+0.5f, y+0.5f, 0.0f, 1.0f
+                            )
+                        );
+            }
 		}
 	}
-	draw_mesh(cursor_mesh,
+/**	draw_mesh(cursor_mesh,
 		glm::mat4(
 			1.0f, 0.0f, 0.0f, 0.0f,
 			0.0f, 1.0f, 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
 			cursor.x+0.5f, cursor.y+0.5f, 0.0f, 1.0f
 		)
-	);
+	); **/
 
 
 	glUseProgram(0);
