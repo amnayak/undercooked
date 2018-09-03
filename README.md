@@ -22,12 +22,11 @@ The hardest part of this project is understanding the base code. I took 2-3 days
 
 I also assumed that adding vertex color functionality to the python file would be difficult, but it only ended up taking a few minutes on the blender python docs.
 
-I'm pretty terrible at making assets ಠ\_ಠ so it looks pretty janky despite not having any bugs, and fulfilling the design doc. I hadn't touched blender in 6+ years so coloring the cubes and navigating took 2 hours.
+I'm pretty terrible at making assets ಠ\_ಠ so it looks jank despite not having any bugs, and fulfilling the design doc. I hadn't touched blender in 6+ years so coloring the cubes and navigating took 2 hours.
 
 
 Good Code:
-I liked how I separated some functionality to make it more readable (generate\_game\_data and update\_chef\_loc).
-I thought it was pretty nifty how I generated random positions and determined whether the chef was in the right place to pick up an ingredient.
+My favorite section is how I generated random positions and determined whether the chef was in the right place to pick up an ingredient.
 I created a list of arrays of 3 vectors (Line 237). In each array, the first two entries are possible positions for an ingredient, and the third entry is the position the chef would need to be able to get that ingredient. To get random positions I'd use mt() to get a random array from the list, then pick one of the first two vectors for the ingredient position, and save the third vector. Then I'd delete the array from the list for the next ingredient. Note how two ingredients can't share the same "chef location" tile, so it's never ambiguous to the player what ingredient they're picking up.
 
 # Using This Base Code
