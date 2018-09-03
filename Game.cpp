@@ -172,11 +172,13 @@ Game::Game() {
 			}
 			return f->second;
 		};
-		tile_mesh = lookup("Tile");
-		cursor_mesh = lookup("Cursor");
-		doll_mesh = lookup("Doll");
-		egg_mesh = lookup("Egg");
-		cube_mesh = lookup("Cube");
+		tile_mesh = lookup("tile");
+		peanut_mesh = lookup("peanut");
+		jelly_mesh = lookup("jelly");
+		bread_mesh = lookup("bread");
+		serve_mesh = lookup("serve");
+		chef_mesh = lookup("chef");
+		counter_mesh = lookup("counter");
 	}
 
 	{ //create vertex array object to hold the map from the mesh vertex buffer to shader program attributes:
@@ -204,7 +206,7 @@ Game::Game() {
 	//board_rotations.reserve(board_size.x * board_size.y);
 
 	mt = std::mt19937(std::time(NULL));
-    meshes = { &doll_mesh, &egg_mesh, &cube_mesh };
+    meshes = { &tile_mesh, &peanut_mesh, &jelly_mesh, &bread_mesh, &serve_mesh, &chef_mesh, &counter_mesh };
     generate_game_data();
 
 }
@@ -220,6 +222,10 @@ Game::~Game() {
 	simple_shading.program = -1U;
 
 	GL_ERRORS();
+}
+
+void Game::update (float elapsed) {
+    return;
 }
 
 void Game::generate_game_data () {
@@ -273,20 +279,22 @@ void Game::generate_game_data () {
 
     //fill boardmesh
 
+    meshes = { &tile_mesh, &peanut_mesh, &jelly_mesh, &bread_mesh, &serve_mesh, &chef_mesh, &counter_mesh };
+
     for (uint32_t i = 0; i < board_size.y; ++i) {
         for (uint32_t j = 0; j < board_size.x; ++j) {
             if ( i>=1 && i<=3 && j>=1 && j<=3) { //inner tiles
-                board_meshes[to1D(j,i)] = NULL; //TODO:: spawn borders
+                board_meshes[to1D(j,i)] = NULL;
             } else {
-                board_meshes[to1D(j,i)] = NULL; //TODO:: spawn borders
+                board_meshes[to1D(j,i)] = meshes[6]; //spawn borders
             }
         }
     }
-    board_meshes[to1D(chef_loc.x,chef_loc.y)] = meshes[0]; //place a doll in the middle
-    board_meshes[to1D(p_loc.x,p_loc.y)] = meshes[1]; //place a doll in the middle
-    board_meshes[to1D(b_loc.x,b_loc.y)] = meshes[2]; //place a doll in the middle
-    board_meshes[to1D(j_loc.x,j_loc.y)] = meshes[1]; //place a doll in the middle
-    board_meshes[to1D(serve_loc.x,serve_loc.y)] = meshes[0]; //place a doll in the middle
+    board_meshes[to1D(chef_loc.x,chef_loc.y)] = meshes[5]; //place a chef in the middle
+    board_meshes[to1D(p_loc.x,p_loc.y)] = meshes[1]; //place peanut butter
+    board_meshes[to1D(b_loc.x,b_loc.y)] = meshes[3]; //place bread
+    board_meshes[to1D(j_loc.x,j_loc.y)] = meshes[2]; //place jelly
+    board_meshes[to1D(serve_loc.x,serve_loc.y)] = meshes[4]; //place serve counter
 }
 
 size_t Game::to1D (size_t x, size_t y) {
@@ -301,7 +309,7 @@ void Game::update_chef_loc(uint32_t x, uint32_t y) {
     board_meshes[to1D(chef_loc.x, chef_loc.y)] = NULL;
     chef_loc.x = i;
     chef_loc.y = j;
-    board_meshes[to1D(chef_loc.x, chef_loc.y)] = meshes[0];
+    board_meshes[to1D(chef_loc.x, chef_loc.y)] = meshes[5];
 
 }
 
@@ -349,18 +357,6 @@ bool Game::handle_event(SDL_Event const &evt, glm::uvec2 window_size) {
 		}
     }
 	return false;
-}
-
-void Game::update(float elapsed) {
-	if (controls.roll_left) {
-       //TODO: bounds checking, min func, fix smthn, other controls
-	}
-	if (controls.roll_right) {
-	}
-	if (controls.roll_up) {
-	}
-	if (controls.roll_down) {
-	}
 }
 
 void Game::draw(glm::uvec2 drawable_size) {
@@ -439,15 +435,6 @@ void Game::draw(glm::uvec2 drawable_size) {
             }
 		}
 	}
-/**	draw_mesh(cursor_mesh,
-		glm::mat4(
-			1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			cursor.x+0.5f, cursor.y+0.5f, 0.0f, 1.0f
-		)
-	); **/
-
 
 	glUseProgram(0);
 

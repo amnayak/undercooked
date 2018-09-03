@@ -23,11 +23,9 @@ struct Game {
 	//The function should return 'true' if it handled the event.
 	bool handle_event(SDL_Event const &evt, glm::uvec2 window_size);
 
-	//update is called at the start of a new frame, after events are handled:
-	void update(float elapsed);
+    void update (float elapsed);
 
-	//draw is called after update:
-	void draw(glm::uvec2 drawable_size);
+    void draw(glm::uvec2 drawable_size);
 
     //converts coordinates from 2D to 1D
     size_t to1D(size_t x, size_t y);
@@ -70,10 +68,12 @@ struct Game {
 	};
 
 	Mesh tile_mesh;
-	Mesh cursor_mesh;
-	Mesh doll_mesh;
-	Mesh egg_mesh;
-	Mesh cube_mesh;
+	Mesh peanut_mesh;
+	Mesh jelly_mesh;
+	Mesh bread_mesh;
+	Mesh serve_mesh;
+	Mesh chef_mesh;
+	Mesh counter_mesh;
 
 	GLuint meshes_for_simple_shading_vao = -1U; //vertex array object that describes how to connect the meshes_vbo to the simple_shading_program
 
@@ -82,24 +82,20 @@ struct Game {
 	glm::uvec2 board_size = glm::uvec2(5,5);
 	std::vector< Mesh const * > board_meshes;
     std::vector< Mesh const * > meshes;
-//	std::vector< glm::quat > board_rotations;
 
-//	glm::uvec2 curor = glm::vec2(0,0);
 	struct {
 		bool roll_left = false;
 		bool roll_right = false;
 		bool roll_up = false;
 		bool roll_down = false;
 	} controls;
-//TODO: spell it out
     struct {
         size_t p = 0;
         size_t b = 0;
         size_t j = 0;
     } inventory;
 
-    //TODO: you're gonna generate game data anyway
-
+    //game data for item locations
     glm::uvec2 p_loc = glm::vec2(1,4);
     glm::uvec2 b_loc = glm::vec2(3,4);
     glm::uvec2 j_loc = glm::vec2(0,1);
