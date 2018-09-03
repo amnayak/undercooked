@@ -341,7 +341,7 @@ bool Game::handle_event(SDL_Event const &evt, glm::uvec2 window_size) {
                 inventory.j = min(inventory.j + 1, 1);
             } else if ( chef_loc.x == serve_pickup.x && chef_loc.y == serve_pickup.y) {
                 if (inventory.p == 1 && inventory.j == 1 && inventory.b == 2) {
-                    //TODO: YOU WIN, RESET THE GAME
+                    //reset the game once you win
                     generate_game_data();
                 }
             }
@@ -352,10 +352,7 @@ bool Game::handle_event(SDL_Event const &evt, glm::uvec2 window_size) {
 }
 
 void Game::update(float elapsed) {
-	//if the roll keys are pressed, rotate everything on the same row or column as the cursor:
-	//float amt = elapsed * 1.0f;
 	if (controls.roll_left) {
-      // something.transform->position.x += amt * -1.0f;
        //TODO: bounds checking, min func, fix smthn, other controls
 	}
 	if (controls.roll_right) {
