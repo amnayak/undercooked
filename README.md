@@ -1,23 +1,35 @@
 # Game Information
 (Note: fill in this portion with information about your game.)
 
-Title: (TODO: your game's title)
+Title: Undercooked
 
-Author: (TODO: your name)
+Author: Amukta Nayak
 
-Design Document: [TODO: name of design document](TODO: link to design document)
+Design Document: [Undercooked](http://graphics.cs.cmu.edu/courses/15-466-f18/game0-designs/jgualtie/)
 
 Screen Shot:
 
 ![Screen Shot](screenshot.png)
 
-Difficulties Encountered:
+Controls:
+A/S/W/D or L/R/U/D to move
+SPACE to pickup ingredients/drop off assembled dish
 
-TODO: write several sentences about any difficulties you may have encountered in creating the game.
+Slight modification to design doc:
+For added realism, you need to collect 2 breads to make a sandwich (was 1 in the original design).
+
+Difficulties Encountered:
+The hardest part of this project is understanding the base code. I took 2-3 days just reading and commenting on lines to understand how it works. I was intimidated by all the opengl/graphics specific functions in the code. Ultimately, I didn't need to modify much of that to implement this game.
+
+I also assumed that adding vertex color functionality to the python file would be difficult, but it only ended up taking a few minutes on the blender python docs.
+
+I'm pretty terrible at making assets ಠ\_ಠ so it looks pretty janky despite not having any bugs, and fulfilling the design doc. I hadn't touched blender in 6+ years so coloring the cubes and navigating took 2 hours.
+
 
 Good Code:
-
-TODO: write a sentence or two about any code you think you did particularly well.
+I liked how I separated some functionality to make it more readable (generate\_game\_data and update\_chef\_loc).
+I thought it was pretty nifty how I generated random positions and determined whether the chef was in the right place to pick up an ingredient.
+I created a list of arrays of 3 vectors (Line 237). In each array, the first two entries are possible positions for an ingredient, and the third entry is the position the chef would need to be able to get that ingredient. TO get random positions I'd use mt() to get a random array entry, then pick one of the first to vectors for the ingredient position, and save the third vector. THen I'd delete this entry from the list for the next ingredient. Note how two ingredients can't share the same "chef location" tile, so it's never ambiguous to the player what ingredient they're picking up.
 
 # Using This Base Code
 

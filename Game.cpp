@@ -203,7 +203,6 @@ Game::Game() {
 	//----------------
 	//set up game board with meshes and rolls:
 	board_meshes.reserve(board_size.x * board_size.y);
-	//board_rotations.reserve(board_size.x * board_size.y);
 
 	mt = std::mt19937(std::time(NULL));
     meshes = { &tile_mesh, &peanut_mesh, &jelly_mesh, &bread_mesh, &serve_mesh, &chef_mesh, &counter_mesh };
@@ -324,16 +323,16 @@ bool Game::handle_event(SDL_Event const &evt, glm::uvec2 window_size) {
 	}
 	//handle tracking the state of WSAD for roll control:
 	if (evt.type == SDL_KEYDOWN) {
-		if (evt.key.keysym.scancode == SDL_SCANCODE_W) {
+		if (evt.key.keysym.scancode == SDL_SCANCODE_W || evt.key.keysym.scancode == SDL_SCANCODE_UP) {
             update_chef_loc(0, 1);
 			return true;
-		} else if (evt.key.keysym.scancode == SDL_SCANCODE_S) {
+		} else if (evt.key.keysym.scancode == SDL_SCANCODE_S || evt.key.keysym.scancode == SDL_SCANCODE_DOWN) {
             update_chef_loc(0, -1);
 			return true;
-		} else if (evt.key.keysym.scancode == SDL_SCANCODE_A) {
+		} else if (evt.key.keysym.scancode == SDL_SCANCODE_A || evt.key.keysym.scancode == SDL_SCANCODE_LEFT) {
             update_chef_loc(-1, 0);
 			return true;
-		} else if (evt.key.keysym.scancode == SDL_SCANCODE_D) {
+		} else if (evt.key.keysym.scancode == SDL_SCANCODE_D || evt.key.keysym.scancode == SDL_SCANCODE_RIGHT) {
             update_chef_loc(1, 0);
 			return true;
 		}
