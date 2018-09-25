@@ -8,6 +8,8 @@ if $(OS) = NT { #Windows
 		#disable a few warnings:
 		/wd4146 #-1U is still unsigned
 		/wd4297 #unforunately SDLmain is nothrow
+		/wd4244
+		/wd4267
 	;
 	LINKFLAGS = /nologo /SUBSYSTEM:CONSOLE
 		/LIBPATH:"kit-libs-win/out/lib"

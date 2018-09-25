@@ -10,6 +10,7 @@
 #include <fstream>
 #include <map>
 #include <cstddef>
+#include <ctime>
 
 //helper defined later; throws if shader compilation fails:
 static GLuint compile_shader(GLenum type, std::string const &source);
